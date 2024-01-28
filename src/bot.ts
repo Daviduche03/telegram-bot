@@ -3,6 +3,8 @@ import { chunk } from "lodash";
 import express from "express";
 import { applyTextEffect, Variant } from "./textEffects";
 
+import { CohereClient } from "cohere-ai";
+
 import type { Variant as TextEffectVariant } from "./textEffects";
 
 // Create a bot using the Telegram token
@@ -27,6 +29,19 @@ const aboutUrlKeyboard = new InlineKeyboard().url(
   "https://cyclic.sh/"
 );
 
+const cohere = new CohereClient({
+  token: "7vYy3ir8DsQ1WyrTtjX3nvvHHLlwS5vF6yqqWAOf",
+});
+
+async function AI(message: string) {
+  const generate = await cohere.generate({
+    prompt: message,
+  });
+  console.log(generate.generations[0].text);
+
+ return generate.generations[0].text
+}
+
 const replyWithIntro = (ctx: any) =>
   ctx.reply(introductionMessage, {
     reply_markup: aboutUrlKeyboard,
@@ -36,9 +51,10 @@ const replyWithIntro = (ctx: any) =>
 bot.command("start", replyWithIntro);
 
 // Modified to echo back any received message
-bot.on("message", (ctx) => {
+bot.on("message", async (ctx) => {
   const messageText = ctx.message?.text;
 
+  await AI(messageText || "hi");
   if (messageText) {
     ctx.reply(`You said: ${messageText}`);
   }

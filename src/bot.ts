@@ -47,15 +47,6 @@ const cohere = new CohereClient({
   token: process.env.COHERE_API_KEY || "",
 });
 
-async function AI(message: string) {
-  const generate = await cohere.generate({
-    prompt: message,
-  });
-  console.log(generate.generations[0].text);
-
- return generate.generations[0].text
-}
-
 const replyWithIntro = (ctx: any) =>
   ctx.reply(introductionMessage);
 
@@ -65,12 +56,36 @@ bot.command("start", replyWithIntro);
 bot.on("message", async (ctx) => {
   const messageText = ctx.message?.text;
 
-  const res = await AI(messageText || "hi");
   if (messageText) {
-    ctx.reply(res);
+    try {
+      // Wait for the AI response before sending the reply
+      const aiResponse = await AI(messageText);
+      
+      // Send the AI response back to the user
+      ctx.reply(aiResponse);
+    } catch (error) {
+      console.error("Error processing AI response:", error);
+      // Optionally, handle errors and inform the user
+      ctx.reply("Sorry, there was an error processing your request.");
+    }
   }
 });
 
+// ... (rest of the code)
+
+async function AI(message: string): Promise<string> {
+  try {
+    const generate = await cohere.generate({
+      prompt: message,
+    });
+    console.log(generate.generations[0].text);
+
+    return generate.generations[0].text;
+  } catch (error) {
+    console.error("Error generating AI response:", error);
+    throw error; // Propagate the error to the caller
+  }
+}
 // Start the server exprss
 if (process.env.NODE_ENV === "production") {
   // Use Webhooks for the production server

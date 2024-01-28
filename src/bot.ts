@@ -1,4 +1,4 @@
-import { Bot, InlineKeyboard, webhookCallback } from "grammy";
+import { Bot, InlineKeyboard, webhookCallback, Keyboard } from "grammy";
 import { chunk } from "lodash";
 import express from "express";
 import { applyTextEffect, Variant } from "./textEffects";
@@ -12,6 +12,18 @@ const bot = new Bot(process.env.TELEGRAM_TOKEN || "");
 
 // Handle the /yo command to greet the user
 bot.command("yo", (ctx) => ctx.reply(`Yo ${ctx.from?.username}`));
+
+const keyboard = new Keyboard()
+  .text("Yes, they certainly are").row()
+  .text("I'm not quite sure").row()
+  .text("No. 😈")
+  .resized();
+
+bot.command("help", (ctx) => {
+  await ctx.reply(text, {
+    reply_markup: keyboard,
+  });
+})
 
 // Handle the /effect command to apply text effects using an inline keyboard
 // (Existing code for /effect command remains unchanged)

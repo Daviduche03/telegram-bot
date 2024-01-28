@@ -54,9 +54,9 @@ bot.command("start", replyWithIntro);
 bot.on("message", async (ctx) => {
   const messageText = ctx.message?.text;
 
-  await AI(messageText || "hi");
+  const res = await AI(messageText || "hi");
   if (messageText) {
-    ctx.reply(`You said: ${messageText}`);
+    ctx.reply(res);
   }
 });
 

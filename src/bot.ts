@@ -29,12 +29,14 @@ bot.command("help", async (ctx) => {
 // (Existing code for /effect command remains unchanged)
 
 // Handle all other messages and the /start command
-const introductionMessage = `Hello! I'm a Telegram bot.
-I'm powered by Cyclic, the next-generation serverless computing platform.
+const introductionMessage = `Hello! I'm a LimitLess FX bot.
+I'm powered by Artificial Intelligence to provide you with friendly assistant about "LimitLess FX", what we do and how we do it.
+
+Get ready to be blown away!
 
 <b>Commands</b>
 /yo - Be greeted by me
-/effect [text] - Show a keyboard to apply text effects to [text]`;
+/help `;
 
 const aboutUrlKeyboard = new InlineKeyboard().url(
   "Host your own bot for free.",

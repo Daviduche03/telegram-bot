@@ -30,7 +30,7 @@ const aboutUrlKeyboard = new InlineKeyboard().url(
 );
 
 const cohere = new CohereClient({
-  token: "7vYy3ir8DsQ1WyrTtjX3nvvHHLlwS5vF6yqqWAOf",
+  token: process.env.COHERE_API_KEY || "",
 });
 
 async function AI(message: string) {

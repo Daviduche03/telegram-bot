@@ -14,9 +14,9 @@ const bot = new Bot(process.env.TELEGRAM_TOKEN || "");
 bot.command("yo", (ctx) => ctx.reply(`Yo ${ctx.from?.username}`));
 
 const keyboard = new Keyboard()
-  .text("Yes, they certainly are").row()
-  .text("I'm not quite sure").row()
-  .text("No. 😈")
+  .text("What do guys do?").row()
+  .text("Our Mission?").row()
+  .text("Book a call")
   .resized();
 
 bot.command("help", async (ctx) => {

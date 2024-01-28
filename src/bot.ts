@@ -19,9 +19,7 @@ const keyboard = new Keyboard()
   .text("No. 😈")
   .resized();
 
-bot.command("help", async
-  
-  (ctx) => {
+bot.command("help", async (ctx) => {
   await ctx.reply("Here's a list of commands:", {
     reply_markup: keyboard,
   });

@@ -50,23 +50,36 @@ const cohere = new CohereClient({
 const replyWithIntro = (ctx: any) =>
   ctx.reply(introductionMessage);
 
-bot.command("start", replyWithIntro);
+// Store promises and chat IDs to handle responses sequentially
+const chatPromises = new Map<number, Promise<string>>();
 
-// Modified to echo back any received message
+// ... (commands and setup code)
+
+// Modified to wait for the AI response before replying
 bot.on("message", async (ctx) => {
   const messageText = ctx.message?.text;
+  const chatId = ctx.chat?.id;
 
-  if (messageText) {
+  if (messageText && chatId) {
     try {
+      // Create a new promise for the AI response
+      const aiResponsePromise = AI(messageText);
+
+      // Store the promise with the chat ID
+      chatPromises.set(chatId, aiResponsePromise);
+
       // Wait for the AI response before sending the reply
-      const aiResponse = await AI(messageText);
-      
+      const aiResponse = await aiResponsePromise;
+
       // Send the AI response back to the user
       ctx.reply(aiResponse);
     } catch (error) {
       console.error("Error processing AI response:", error);
       // Optionally, handle errors and inform the user
       ctx.reply("Sorry, there was an error processing your request.");
+    } finally {
+      // Clear the promise for the current chat ID
+      chatPromises.delete(chatId);
     }
   }
 });

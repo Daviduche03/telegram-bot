@@ -57,10 +57,7 @@ async function AI(message: string) {
 }
 
 const replyWithIntro = (ctx: any) =>
-  ctx.reply(introductionMessage, {
-    reply_markup: aboutUrlKeyboard,
-    parse_mode: "HTML",
-  });
+  ctx.reply(introductionMessage);
 
 bot.command("start", replyWithIntro);
 

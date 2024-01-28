@@ -47,39 +47,44 @@ const cohere = new CohereClient({
   token: process.env.COHERE_API_KEY || "",
 });
 
-const replyWithIntro = (ctx: any) =>
-  ctx.reply(introductionMessage);
-
-// Store promises and chat IDs to handle responses sequentially
-const chatPromises = new Map<number, Promise<string>>();
+const messageQueue: { chatId: number; message: string }[] = [];
 
 // ... (commands and setup code)
 
-// Modified to wait for the AI response before replying
-bot.on("message", async (ctx) => {
+// Function to process the next message in the queue
+async function processNextMessage() {
+  if (messageQueue.length > 0) {
+    const { chatId, message } = messageQueue.shift()!;
+
+    try {
+      // Wait for the AI response before sending the reply
+      const aiResponse = await AI(message);
+
+      // Send the AI response back to the user
+      await bot.api.sendMessage(chatId, aiResponse);
+    } catch (error) {
+      console.error("Error processing AI response:", error);
+      // Optionally, handle errors and inform the user
+      await bot.api.sendMessage(chatId, "Sorry, there was an error processing your request.");
+    }
+
+    // Process the next message in the queue
+    processNextMessage();
+  }
+}
+
+// Modified to queue incoming messages
+bot.on("message", (ctx) => {
   const messageText = ctx.message?.text;
   const chatId = ctx.chat?.id;
 
   if (messageText && chatId) {
-    try {
-      // Create a new promise for the AI response
-      const aiResponsePromise = AI(messageText);
+    // Queue the incoming message
+    messageQueue.push({ chatId, message: messageText });
 
-      // Store the promise with the chat ID
-      chatPromises.set(chatId, aiResponsePromise);
-
-      // Wait for the AI response before sending the reply
-      const aiResponse = await aiResponsePromise;
-
-      // Send the AI response back to the user
-      ctx.reply(aiResponse);
-    } catch (error) {
-      console.error("Error processing AI response:", error);
-      // Optionally, handle errors and inform the user
-      ctx.reply("Sorry, there was an error processing your request.");
-    } finally {
-      // Clear the promise for the current chat ID
-      chatPromises.delete(chatId);
+    // If the queue was empty, start processing messages
+    if (messageQueue.length === 1) {
+      processNextMessage();
     }
   }
 });
@@ -99,6 +104,7 @@ async function AI(message: string): Promise<string> {
     throw error; // Propagate the error to the caller
   }
 }
+
 // Start the server exprss
 if (process.env.NODE_ENV === "production") {
   // Use Webhooks for the production server

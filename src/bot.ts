@@ -29,83 +29,37 @@ bot.command("help", async (ctx) => {
 // (Existing code for /effect command remains unchanged)
 
 // Handle all other messages and the /start command
-const introductionMessage = `Hello! I'm a LimitLess FX bot.
-I'm powered by Artificial Intelligence to provide you with friendly assistant about "LimitLess FX", what we do and how we do it.
-
-Get ready to be blown away!
-
-<b>Commands</b>
-/yo - Be greeted by me
-/help `;
-
-const aboutUrlKeyboard = new InlineKeyboard().url(
-  "Host your own bot for free.",
-  "https://cyclic.sh/"
-);
-
-const cohere = new CohereClient({
-  token: process.env.COHERE_API_KEY || "",
+// Handle the /start command
+bot.command("start", (ctx) => {
+  ctx.reply("Hello! I'm your versatile bot. You can use me to broadcast messages, send direct messages, and answer questions!");
 });
 
-const messageQueue: { chatId: number; message: string }[] = [];
+// Handle the /broadcast command to send a message to a channel or group
+bot.command("broadcast", (ctx) => {
+  // Replace CHANNEL_ID with the actual channel or group ID
+  const channelID = "@YourChannelID";
+  ctx.api.sendMessage(channelID, "This is a broadcast message!");
+  ctx.reply("Broadcast sent!");
+});
 
-// ... (commands and setup code)
+// Handle the /senddirect command to send a direct message to a user
+bot.command("senddirect", (ctx) => {
+  // Replace USER_ID with the actual user ID
+  const userID = 2137148868;
+  ctx.api.sendMessage(userID, "This is a direct message!");
+  ctx.reply("Direct message sent!");
+});
 
-// Function to process the next message in the queue
-async function processNextMessage() {
-  if (messageQueue.length > 0) {
-    const { chatId, message } = messageQueue.shift()!;
-
-    try {
-      // Wait for the AI response before sending the reply
-      const aiResponse = await AI(message);
-
-      // Send the AI response back to the user
-      await bot.api.sendMessage(chatId, aiResponse);
-    } catch (error) {
-      console.error("Error processing AI response:", error);
-      // Optionally, handle errors and inform the user
-      await bot.api.sendMessage(chatId, "Sorry, there was an error processing your request.");
-    }
-
-    // Process the next message in the queue
-    processNextMessage();
-  }
-}
-
-// Modified to queue incoming messages
+// Handle all other messages
 bot.on("message", (ctx) => {
   const messageText = ctx.message?.text;
-  const chatId = ctx.chat?.id;
 
-  if (messageText && chatId) {
-    // Queue the incoming message
-    messageQueue.push({ chatId, message: messageText });
-
-    // If the queue was empty, start processing messages
-    if (messageQueue.length === 1) {
-      processNextMessage();
-    }
+  if (messageText) {
+    // Implement logic to analyze incoming messages and provide responses
+    // For simplicity, let's echo the message for now
+    ctx.reply(`You said: ${messageText}`);
   }
-});
-
-// ... (rest of the code)
-
-async function AI(message: string): Promise<string> {
-  try {
-    const generate = await cohere.generate({
-      prompt: message,
-    });
-    console.log(generate.generations[0].text);
-
-    return generate.generations[0].text;
-  } catch (error) {
-    console.error("Error generating AI response:", error);
-    throw error; // Propagate the error to the caller
-  }
-}
-
-// Start the server exprss
+}); 
 if (process.env.NODE_ENV === "production") {
   // Use Webhooks for the production server
   const app = express();
